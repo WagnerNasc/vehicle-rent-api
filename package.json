@@ -1,0 +1,27 @@
+{
+  "name": "vehicle_rent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/test.js",
+  "scripts": {
+    "start:dev": "tsx watch src/app.ts",
+    "start": "node build/app.js",
+    "build": "tsup src --out-dir build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "7.0.1"
+  },
+  "devDependencies": {
+    "@rocketseat/eslint-config": "2.1.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.9.3",
+    "tsup": "^8.0.1",
+    "tsx": "^4.2.0",
+    "typescript": "^5.3.2"
+  }
+}

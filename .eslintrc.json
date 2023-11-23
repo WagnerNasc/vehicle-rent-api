@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "@rocketseat/eslint-config/node"
+  ],
+  "rules": {
+    "no-useless-constructor": "off",
+    "no-useless-catch": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/adjacent-overload-signatures": "off"
+  }
+}
