@@ -1,5 +1,6 @@
 import { BadRequest, NotFound } from './error/errors'
 import { Model } from './model'
+import { randomUUID } from 'crypto'
 
 export type TVehicle = 'CARRO' | 'MOTORCYCLE'
 
@@ -102,6 +103,32 @@ export class Vehicle {
 
   get increasePorcentage(): number {
     return this._increasePorcentage
+  }
+
+  static findPlate(plate: string): boolean {
+    return Vehicle.vehicles.find(v => v._plate == plate) ? true : false
+  }
+
+  static create(vehicle: Vehicle): void {
+    const alreadyExistsVehicle = Vehicle.findPlate(vehicle.plate)
+
+    if(alreadyExistsVehicle){
+      throw new BadRequest(`Veículo com placa ${vehicle.plate} já cadastrado`)
+    } 
+
+    const id = randomUUID()
+    const newVehicle: Vehicle = {
+      id,
+      model: vehicle.model,
+      color: vehicle.color,
+      chassis: vehicle.chassis,
+      type: vehicle.type,
+      plate: vehicle.plate,
+      valueRental: vehicle.valueRental,
+      rented: vehicle.rented,
+    }
+
+    Vehicle.vehicles.push(newVehicle)
   }
 
   // TO-DO - ALUGAR VEICULO
