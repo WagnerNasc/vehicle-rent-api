@@ -117,18 +117,19 @@ export class Vehicle {
     } 
 
     const id = randomUUID()
-    const newVehicle: Vehicle = {
-      id,
-      model: vehicle.model,
-      color: vehicle.color,
-      chassis: vehicle.chassis,
-      type: vehicle.type,
-      plate: vehicle.plate,
-      valueRental: vehicle.valueRental,
-      rented: vehicle.rented,
-    }
+    // const newVehicle: Vehicle = {
+    //   id,
+    //   model: vehicle.model,
+    //   color: vehicle.color,
+    //   chassis: vehicle.chassis,
+    //   type: vehicle.type,
+    //   plate: vehicle.plate,
+    //   valueRental: vehicle.valueRental,
+    //   rented: vehicle.rented,
+    // }
 
-    Vehicle.vehicles.push(newVehicle)
+    // Vehicle.vehicles.push(newVehicle)
+    Vehicle.vehicles.push(vehicle)
   }
 
   // TO-DO - ALUGAR VEICULO
