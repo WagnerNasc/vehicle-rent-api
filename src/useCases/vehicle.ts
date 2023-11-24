@@ -160,4 +160,12 @@ export class Vehicle {
 
     return Vehicle.vehicles.slice(startIndex, endIndex)
   }
+
+  static listRentedVehicles(): Vehicle[] {
+    return Vehicle.vehicles.filter((vehicle) => vehicle._rented === true)
+  }
+
+  static listAvailableVehicles(): Vehicle[] {
+    return Vehicle.vehicles.filter((vehicle) => vehicle._rented === false)
+  }
 }
