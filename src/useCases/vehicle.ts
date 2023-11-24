@@ -107,20 +107,19 @@ export class Vehicle {
   }
 
   static findPlate(plate: string): boolean {
-    return Vehicle.vehicles.find(v => v._plate == plate) ? true : false
+    return Vehicle.vehicles.some(vehicle => vehicle.plate === plate)
   }
 
-  static create(vehicle: Vehicle): void {
+  static create(vehicle: Vehicle): Vehicle {
     const alreadyExistsVehicle = Vehicle.findPlate(vehicle.plate)
 
     if(alreadyExistsVehicle){
-      throw new BadRequest(`Veículo com placa ${vehicle.plate} já cadastrado`)
+      throw new BadRequest()
     } 
 
-    const id = randomUUID()
-
-    // Vehicle.vehicles.push(newVehicle)
     Vehicle.vehicles.push(vehicle)
+
+    return vehicle
   }
 
   // TO-DO - DEVOLVER VEÍCULO
@@ -148,7 +147,7 @@ export class Vehicle {
 
   static getByPlate(plate: string): Vehicle  {
     const response = Vehicle.vehicles.filter(
-      (vehicle) => vehicle._plate === plate,
+      (vehicle) => vehicle.plate === plate,
     )[0]
 
     return response

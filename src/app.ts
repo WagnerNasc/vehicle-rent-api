@@ -5,7 +5,7 @@ import { Customer, ECategoryType } from './useCases/customer'
 import { TVehicle, Vehicle } from './useCases/vehicle'
 
 import 'dotenv/config'
-import { BadRequest, InternalServer, NotFound } from './useCases/error/errors'
+import { AlreadyRegistered, BadRequest, InternalServer, NotFound } from './useCases/error/errors'
 
 /** Vehicles */
 
@@ -23,7 +23,8 @@ app.post(
   [
     body('cpf').isString().notEmpty(),
     body('name').isString().notEmpty(),
-    body('categoryType')
+    body('dateOfBirth').isString().notEmpty(),
+    body('driverLicense')
       .isString()
       .notEmpty()
       .custom((value) => allowedCustomerCategoryTypes.includes(value)),
@@ -34,15 +35,51 @@ app.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() })
     }
+    
+    const customer = req.body
 
     try {
-      const { cpf, name, categoryType } = req.body
-      const newCustomer = new Customer(cpf, name, categoryType)
+      const newCustomer = Customer.create(customer)
 
       res.status(200).send({
         data: newCustomer,
       })
     } catch (error) {
+      if (error instanceof AlreadyRegistered) {
+        return res.status(400).send({ message: 'Cliente já registrado' })
+      }
+      return res.status(500).send({ message: new InternalServer() })
+    }
+  },
+)
+
+app.get(
+  '/customer/:customerId',
+  [param('customerId').isString()],
+  (req: Request, res: Response) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { customerId } = req.params
+
+    try {
+      const foundCustomer = Customer.getById(customerId)
+
+      if (!foundCustomer) {
+        throw new NotFound()
+      }
+
+      return res.status(200).send({
+        data: foundCustomer,
+      })
+    } catch (error) {
+      if (error instanceof NotFound) {
+        return res.status(400).send({ message: 'Veículo não foi encontrado' })
+      }
+
       return res.status(500).send({ message: new InternalServer() })
     }
   },
@@ -62,7 +99,7 @@ app.post(
       .notEmpty()
       .custom((value) => allowedTypes.includes(value)),
     body('plate').isString().notEmpty(),
-    body('hourlyRate').isNumeric(),
+    body('dailyRental').isNumeric(),
   ],
   (req: Request, res: Response) => {
     const errors = validationResult(req)
@@ -71,23 +108,19 @@ app.post(
       return res.status(400).json({ errors: errors.array() })
     }
 
-    const { model, color, chassis, type, plate, hourlyRate } = req.body
+    const { model, color, chassis, type, plate, dailyRental } = req.body
 
     try {
-      const newVehicle = new Vehicle(
-        model,
-        color,
-        chassis,
-        type,
-        plate,
-        hourlyRate,
-        false,
-      )
-
+      const vehicle: Vehicle = { model, color, chassis, type, plate, dailyRental, rented: false  } as Vehicle
+      const newVehicle = Vehicle.create(vehicle)
+      
       return res.status(200).send({
         data: newVehicle,
       })
     } catch (error) {
+      if (error instanceof BadRequest) {
+        return res.status(400).send({ message: `Veículo com placa ${plate} já cadastrado` })
+      }
       return res.status(500).send({ message: new InternalServer() })
     }
   },
@@ -97,14 +130,15 @@ app.get(
   '/vehicle/:plateId',
   [param('plateId').isString()],
   (req: Request, res: Response) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { plateId } = req.params
+
     try {
-      const errors = validationResult(req)
-
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() })
-      }
-
-      const { plateId } = req.params
       const foundVehicle = Vehicle.getByPlate(plateId)
 
       if (!foundVehicle) {
@@ -135,18 +169,18 @@ app.get(
       .withMessage('Page deve ser um número inteiro maior que 0'),
   ],
   (req: Request, res: Response) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1
+    const limit = req.query.limit
+      ? parseInt(req.query.limit as string, 10)
+      : 10
+
     try {
-      const errors = validationResult(req)
-
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() })
-      }
-
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1
-      const limit = req.query.limit
-        ? parseInt(req.query.limit as string, 10)
-        : 10
-
       const foundVehicle = Vehicle.getAll(page, limit)
 
       if (!foundVehicle) {
@@ -206,6 +240,39 @@ app.delete(
   },
 )
 
+/** Rent */
+
+app.post(
+  '/rent',
+  [
+    body('rentalDate').isString().notEmpty(),
+    body('devolutionDate').isString().notEmpty(),
+    body('categoryType')
+      .isString()
+      .notEmpty()
+      .custom((value) => allowedCustomerCategoryTypes.includes(value)),
+  ],
+  (req: Request, res: Response) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { cpf, name, categoryType } = req.body
+
+    try {
+      // const newCustomer = new Customer(cpf, name, categoryType)
+
+      res.status(200).send({
+        // data: newCustomer,
+      })
+    } catch (error) {
+      return res.status(500).send({ message: new InternalServer() })
+    }
+  },
+)
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at ${PORT} port.`)
+  console.log(`🚙 Server running at ${PORT} port.`)
 })

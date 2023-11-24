@@ -1,6 +1,5 @@
 import { UUID, randomUUID } from 'crypto'
 import { AlreadyRegistered, NotFound } from './error/errors'
-import { Vehicle } from './vehicle'
 
 export enum ECategoryType {
   A = 'A',
@@ -19,6 +18,7 @@ export class Customer {
   private _id: UUID
   private _cpf: string
   private _name: string
+  private _dateOfBirth: Date
   private _driverLicense: ECategoryType
   private _hasRent = false
   
@@ -27,11 +27,13 @@ export class Customer {
   constructor(
     cpf: string,
     name: string,
+    dateOfBirth: Date,
     driverLicense: ECategoryType,
   ) {
     this._id = randomUUID()
     this._cpf = cpf
     this._name = name
+    this._dateOfBirth = dateOfBirth
     this._driverLicense = driverLicense
   }
 
@@ -47,6 +49,10 @@ export class Customer {
     return this._name
   }
 
+  get dateOfBirth(): Date {
+    return this._dateOfBirth
+  }
+
   get driverLicense(): string {
     return this._driverLicense
   }
@@ -59,16 +65,22 @@ export class Customer {
     this._hasRent = newRent
   }
 
-  static create(customer: Customer): void {
-    const alreadyExistsCustomer = this.customers.find(
-      (customer) => customer._id === customer._cpf,
+  static create(newCustomer: Customer): Customer {
+    const alreadyExistsCustomer = this.customers.some(
+      customer => customer.cpf === newCustomer.cpf,
     )
 
     if (alreadyExistsCustomer) {
       throw new AlreadyRegistered()
     }
 
-    Customer.customers.push(customer)
+    Customer.customers.push(newCustomer)
+    
+    // TO-DO precisei fazer mais uma consulta para pegar o ID e mandar para front!
+
+    const customer = this.customers.find(customer => customer.cpf === newCustomer.cpf)
+
+    return customer as Customer
   }
 
   static getById(customerId: string): Customer {
