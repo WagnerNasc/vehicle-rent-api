@@ -1,13 +1,19 @@
 import { Customer } from "./customer";
+import { DataInvalid, NotFound } from "./error/errors";
 import { Invoice } from "./invoice";
+import { compareLicense } from "./utils/rentValidation";
 import { TVehicle, Vehicle } from "./vehicle";
+
+const IVehicle = {
+    'CAR' : 'B',
+    'MOTORCYCLE' : 'A',
+}
 
 export class Rent {
     private _customer: Customer;
     private _vehicle: Vehicle;
     private _rentalDate: Date;
     private _devolutionDate: Date;
-    private _dailyRate: number;
     private _daysRented: number;
     private _vehicleType: TVehicle;
     private _surcharge: number;
@@ -18,7 +24,6 @@ export class Rent {
         vehicle: Vehicle,
         rentalDate: Date,
         devolutionDate: Date,
-        dailyRate: number,
         daysRented: number,
         vehicleType: TVehicle,
         surcharge: number
@@ -27,7 +32,6 @@ export class Rent {
         this._vehicle = vehicle;
         this._rentalDate = rentalDate;
         this._devolutionDate = devolutionDate;
-        this._dailyRate = dailyRate;
         this._daysRented = daysRented;
         this._vehicleType = vehicleType;
         this._surcharge = surcharge;
@@ -66,14 +70,6 @@ export class Rent {
         this._devolutionDate = newDevolutionDate;
     }
 
-    get dailyRate(): number {
-        return this._dailyRate;
-    }
-
-    set dailyRate(newDailyRate: number) {
-        this._dailyRate = newDailyRate;
-    }
-
     get daysRented(): number {
         return this._daysRented;
     }
@@ -98,9 +94,9 @@ export class Rent {
         this._surcharge = newSurcharge;
     }
 
-    calculateTotalValue(): number {
-        return this._dailyRate * this._daysRented;
-    }
+    // calculateTotalValue(): number {
+    //     return  * this._daysRented;
+    // }
 
     generateInvoice(): string {
         return this._invoice.generateInvoice();
@@ -112,10 +108,35 @@ export class Rent {
         return valueBase + valueIncrease;
     }
 
-    // TO-DO
-    rentVehicle(vehicle: Vehicle): boolean {
-        
-        return true;
+    // TO-DO - ALUGAR VEICULO
+    rentVehicle(userId: string, plate: string, rentalDate: Date): boolean {
+        const user = Customer.getById(userId)
+
+        if (!user) {
+            throw new DataInvalid("Usuário Inválido")
+        }
+
+        const vehicle = Vehicle.getByPlate(plate)
+
+        if (!vehicle) {
+            throw new DataInvalid("Veículo Inválido")
+        }
+
+        if (vehicle.rented) {
+            throw new NotFound("Veiculo está em uso e não poderá ser alugado")
+        }
+
+        const driverLicenseUser = user.driverLicense
+        const typeVehicle = IVehicle[vehicle.type] 
+        const verifyLicense = compareLicense(typeVehicle, driverLicenseUser)
+
+        if (!verifyLicense) {
+            throw new DataInvalid("Usuário não possui habilitação para dirigir este veículo")
+        }
+
+        this.vehicle.rented = true
+
+        return true
     }
 
     // TO-DO

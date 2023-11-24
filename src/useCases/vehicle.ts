@@ -3,7 +3,7 @@ import { Customer } from './customer'
 import { BadRequest, DataInvalid, NotFound } from './error/errors'
 import { Model } from './model'
 
-export type TVehicle = 'CARRO' | 'MOTORCYCLE'
+export type TVehicle = 'CAR' | 'MOTORCYCLE'
 
 export class Vehicle {
   private _model: Model
@@ -11,7 +11,7 @@ export class Vehicle {
   private _chassis: string
   private _type: TVehicle
   private _plate: string
-  private _valueRental: number
+  private _dailyRental: number
   private _rented = false
 
   private _increasePorcentage = 0
@@ -24,7 +24,7 @@ export class Vehicle {
     chassis: string,
     type: TVehicle,
     plate: string,
-    valueRental: number,
+    dailyRental: number,
     rented: boolean,
   ) {
     this._model = model
@@ -32,7 +32,7 @@ export class Vehicle {
     this._chassis = chassis
     this._type = type
     this._plate = plate
-    this._valueRental = valueRental
+    this._dailyRental = dailyRental
     this._rented = rented
 
     // TO-DO validar dados de entrada
@@ -81,14 +81,14 @@ export class Vehicle {
   }
 
   get valueRental(): number {
-    return this._valueRental
+    return this._dailyRental
   }
 
   set valueRental(newValueRental) {
     if (newValueRental <= 0) {
       throw new BadRequest('O valor do aluguel deve ser maior que zero')
     }
-    this._valueRental = newValueRental
+    this._dailyRental = newValueRental
   }
 
   get rented(): boolean {
@@ -121,39 +121,6 @@ export class Vehicle {
 
     // Vehicle.vehicles.push(newVehicle)
     Vehicle.vehicles.push(vehicle)
-  }
-
-  // TO-DO - ALUGAR VEICULO
-  rentVehicle(userId: string, plate: string, valueRent: number): void {
-    const user = Customer.getById(userId)
-    console.log(valueRent)
-
-    if(!user){
-      throw new DataInvalid("Usuário Inválido")
-    }
-
-    const vehicle = Vehicle.getByPlate(plate)
-    console.log(vehicle) // TEST
-
-
-    if(!vehicle){
-      throw new DataInvalid("Veículo Inválido")
-    }
-
-    if(vehicle.rented){
-      throw new NotFound("Veiculo está em uso e não poderá ser alugado")
-    }
-
-    const driverLicenseUser = user.driverLicense
-
-    // const typeVehicle = vehicle.type 
-
-    const cl = compareLicence('A', driverLicenseUser)
-
-    if(cl){
-      this.rented = true
-      Customer.rentVehicle() // TO-DO
-    }
   }
 
   // TO-DO - DEVOLVER VEÍCULO
