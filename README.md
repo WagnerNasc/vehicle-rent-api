@@ -50,10 +50,10 @@ enquanto motos terão 5%.
 - [x] 1. Cadastrar veículo
 - [x] 2. Alugar veículo - Pablo
 - [x] 3. Devolver veículo - Pablo
-- [ ] 4. Listar veículos disponíveis - Wagner
-- [ ] 5. Listar veículos alugados - Wagner
+- [x] 4. Listar veículos disponíveis - Wagner
+- [x] 5. Listar veículos alugados - Wagner
 - [x] 6. Mostrar fatura do cliente - Gabriel
-- [ ] 7. Sair do sistema - Bart
+<!-- - [ ] 7. Sair do sistema - Bart -->
 
 ## Entrega do Projeto
 - O código fonte do projeto deve ser desenvolvido em TypeScript ou, no máximo, em JavaScript
