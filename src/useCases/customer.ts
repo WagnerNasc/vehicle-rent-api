@@ -47,6 +47,14 @@ export class Customer {
     return this._driverLicense
   }
 
+  get hasRent(): boolean {
+    return this._hasRent
+  }
+
+  set hasRent(newRent: boolean) {
+    this._hasRent = newRent
+  }
+
   static create(customer: Customer): void {
     const alreadyExistsCustomer = this.customers.find(
       (customer) => customer._id === customer._cpf,
