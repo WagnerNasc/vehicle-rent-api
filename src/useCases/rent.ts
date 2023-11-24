@@ -1,7 +1,7 @@
 import { Customer } from "./customer";
 import { BadRequest, DataInvalid, NotFound } from "./error/errors";
 import { Invoice } from "./invoice";
-import { compareLicense } from "./utils/rentValidation";
+import { compareLicense, verifyCustomer, verifyVehicle } from "./utils/rentValidation";
 import { Vehicle } from "./vehicle";
 
 const IVehicle = {
@@ -101,24 +101,10 @@ export class Rent {
     // TO-DO - ALUGAR VEICULO
     rentVehicle(): boolean {
         const customer = Customer.getById(this._customer.id)
-
-        if (!customer) {
-            throw new DataInvalid("Usuário Inválido")
-        }
-
-        if(customer.hasRent){
-            throw new BadRequest("Usuário já possui um veículo alugado")
-        }
+        verifyCustomer(customer)
 
         const vehicle = Vehicle.getByPlate(this.vehicle.plate)
-
-        if (!vehicle) {
-            throw new DataInvalid("Veículo Inválido")
-        }
-
-        if (vehicle.rented) {
-            throw new BadRequest("Veiculo está em uso e não poderá ser alugado")
-        }
+        verifyVehicle(vehicle)
 
         const driverLicenseUser = customer.driverLicense
         const typeVehicle = IVehicle[vehicle.type] 
@@ -133,7 +119,6 @@ export class Rent {
         const days = (this._devolutionDate.getDay() - this._rentalDate.getDay())
         const increasePorcentage = this.vehicle.type === 'CAR' ? 10 : 5;
         this._valueRental = this.calculateRent(days, increasePorcentage)
-        // TODO
 
         Rent.listOfRent.push(this)
         return true
