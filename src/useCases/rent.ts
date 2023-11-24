@@ -102,8 +102,24 @@ export class Rent {
         return this._dailyRate * this._daysRented;
     }
 
-    genrateInvoice(): string {
+    generateInvoice(): string {
         return this._invoice.generateInvoice();
     }
 
+    calculateRent(days: number, increasePorcentage: number): number {
+        const valueBase = days * this.vehicle.valueRental;
+        const valueIncrease = valueBase * (increasePorcentage / 100);
+        return valueBase + valueIncrease;
+    }
+
+    // TO-DO
+    rentVehicle(vehicle: Vehicle): boolean {
+        
+        return true;
+    }
+
+    // TO-DO
+    static returnVehicle(): boolean {
+        return true;
+    }
 }

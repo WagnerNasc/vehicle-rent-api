@@ -14,13 +14,6 @@ export enum ECategoryType {
   AE = 'AE',
 }
 
-// export interface ICustomer {
-//   id: string
-//   cpf: string
-//   name: string
-//   driverLicense: string
-// }
-
 export class Customer {
   
   private _id: UUID
@@ -63,14 +56,6 @@ export class Customer {
       throw new AlreadyRegistered()
     }
 
-    // const id = randomUUID()
-    // const newcustomer = {
-    //   id,
-    //   cpf: customer._cpf,
-    //   name: customer._name,
-    //   driverLicense: customer._driverLicense,
-    // }
-
     Customer.customers.push(customer)
   }
 
@@ -100,16 +85,6 @@ export class Customer {
     }
 
     this.customers.splice(customerIndex, 1)
-    return true
-  }
-
-  // TO-DO
-  rentVehicle(vehicle: Vehicle): boolean {
-    return true
-  }
-
-  // TO-DO
-  static returnVehicle(): boolean {
     return true
   }
 }
