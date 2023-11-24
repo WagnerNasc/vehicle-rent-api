@@ -44,15 +44,15 @@ enquanto motos terão 5%.
 - [x] 2. Não é permitido excluir um veículo que esteja atualmente alugado.
 
 ### Faturamento:
-- [ ] 1. O sistema, quando solicitado, deve apresentar a fatura a ser paga pelo cliente, detalhando o custo do aluguel de cada veículo. Gabriel
+- [x] 1. O sistema, quando solicitado, deve apresentar a fatura a ser paga pelo cliente, detalhando o custo do aluguel de cada veículo. Gabriel
 
 ### Funcionalidades do Sistema
 - [x] 1. Cadastrar veículo
-- [ ] 2. Alugar veículo - Pablo
-- [ ] 3. Devolver veículo - Pablo
+- [x] 2. Alugar veículo - Pablo
+- [x] 3. Devolver veículo - Pablo
 - [ ] 4. Listar veículos disponíveis - Wagner
 - [ ] 5. Listar veículos alugados - Wagner
-- [ ] 6. Mostrar fatura do cliente - Gabriel
+- [x] 6. Mostrar fatura do cliente - Gabriel
 - [ ] 7. Sair do sistema - Bart
 
 ## Entrega do Projeto
