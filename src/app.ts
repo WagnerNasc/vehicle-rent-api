@@ -290,9 +290,10 @@ app.post(
 
     try {
       const rent = Rent.rentVehicle(cpf, plate, rentalDate, devolutionDate)
-
+      const { vehicle, customer, ...response } = rent;
+      
       res.status(200).send({
-        data: rent,
+        data: response,
       })
     } catch (error) {
       if (error instanceof BadRequest) {

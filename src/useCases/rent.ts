@@ -2,7 +2,7 @@ import { compareLicense, verifyCustomer, verifyVehicle } from "./utils/rentValid
 import { DataInvalid, NotFound } from "./error/errors";
 import { Customer } from "./customer";
 import { Vehicle } from "./vehicle";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, parseISO } from "date-fns";
 
 const IVehicle = {
     'CAR' : 'B',
@@ -20,7 +20,7 @@ interface IInvoice {
     rentalDate: Date;
     devolutionDate: Date;
     valueRental: number;
-  }
+}
 export class Rent {
     private _customer: Customer;
     private _vehicle: Vehicle;
@@ -104,8 +104,10 @@ export class Rent {
         }
 
         vehicle.rented = true
+        const devolution = parseISO(String(devolutionDate)) 
+        const rental = parseISO(String(rentalDate)) 
 
-        const dateRented = differenceInDays(devolutionDate, rentalDate);
+        const dateRented = differenceInDays(devolution, rental);
         const increasePorcentage = vehicle.type === 'CAR' ? 10 : 5;
         const valueRental = this.calculateRent(vehicle, dateRented, increasePorcentage)
 

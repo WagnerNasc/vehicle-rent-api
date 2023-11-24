@@ -11,7 +11,6 @@ export const punctuation = {
   E: 16,
 } as const
 
-// Função responsável por criar uma 
 export function compareLicense(typeVehicle: string, driverLicenseUser: string) {
   if (!typeVehicle) {
     throw new NotFound('Tipo de veiculo inválido')
