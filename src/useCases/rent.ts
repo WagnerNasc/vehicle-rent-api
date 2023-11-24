@@ -17,6 +17,8 @@ export class Rent {
     private _surcharge: number;
     private _invoice: Invoice;
 
+    private static listOfRent: Rent[] = [];
+
     constructor(
         customer: Customer,
         vehicle: Vehicle,
@@ -124,6 +126,7 @@ export class Rent {
         const valueRental = this.calculateRent(days, increasePorcentage)
         // TODO
 
+        Rent.listOfRent.push(this)
         return true
     }
 
