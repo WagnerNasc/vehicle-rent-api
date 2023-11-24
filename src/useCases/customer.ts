@@ -35,6 +35,10 @@ export class Customer {
     this._driverLicense = driverLicense
   }
 
+  get id(): UUID {
+    return this._id
+  }
+
   get cpf(): string {
     return this._cpf
   }

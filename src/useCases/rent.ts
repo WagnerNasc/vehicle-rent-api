@@ -88,8 +88,8 @@ export class Rent {
     }
 
     // TO-DO - ALUGAR VEICULO
-    rentVehicle(userId: string, plate: string, rentalDate: Date, devolutionDate: Date): boolean {
-        const user = Customer.getById(userId)
+    rentVehicle(): boolean {
+        const user = Customer.getById(this._customer.id)
 
         if (!user) {
             throw new DataInvalid("Usuário Inválido")
@@ -99,7 +99,7 @@ export class Rent {
             throw new BadRequest("Usuário já possui um veículo alugado")
         }
 
-        const vehicle = Vehicle.getByPlate(plate)
+        const vehicle = Vehicle.getByPlate(this.vehicle.plate)
 
         if (!vehicle) {
             throw new DataInvalid("Veículo Inválido")
@@ -119,7 +119,7 @@ export class Rent {
 
         this.vehicle.rented = true
 
-        const days = (devolutionDate.getDay() - rentalDate.getDay())
+        const days = (this._devolutionDate.getDay() - this._rentalDate.getDay())
         const increasePorcentage = this.vehicle.type === 'CAR' ? 10 : 5;
         const valueRental = this.calculateRent(days, increasePorcentage)
         // TODO
