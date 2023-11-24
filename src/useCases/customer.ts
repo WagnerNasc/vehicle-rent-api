@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { UUID, randomUUID } from 'crypto'
 import { AlreadyRegistered, NotFound } from './error/errors'
 
 export enum ECategoryType {
@@ -13,21 +13,26 @@ export enum ECategoryType {
   AE = 'AE',
 }
 
-export interface ICustomer {
-  id: string
-  cpf: string
-  name: string
-  driverLicense: string
-}
-
 export class Customer {
-  private static customers: ICustomer[] = []
+  
+  private _id: UUID
+  private _cpf: string
+  private _name: string
+  private _driverLicense: ECategoryType
+  private _hasRent = false
+  
+  private static customers: Customer[] = []
 
   constructor(
-    private _cpf: string,
-    private _name: string,
-    private _driverLicense: ECategoryType,
-  ) {}
+    cpf: string,
+    name: string,
+    driverLicense: ECategoryType,
+  ) {
+    this._id = randomUUID()
+    this._cpf = cpf
+    this._name = name
+    this._driverLicense = driverLicense
+  }
 
   get cpf(): string {
     return this._cpf
@@ -41,45 +46,45 @@ export class Customer {
     return this._driverLicense
   }
 
+  get hasRent(): boolean {
+    return this._hasRent
+  }
+
+  set hasRent(newRent: boolean) {
+    this._hasRent = newRent
+  }
+
   static create(customer: Customer): void {
     const alreadyExistsCustomer = this.customers.find(
-      (customer) => customer.id === customer.cpf,
+      (customer) => customer._id === customer._cpf,
     )
 
     if (alreadyExistsCustomer) {
       throw new AlreadyRegistered()
     }
 
-    const id = randomUUID()
-    const newcustomer = {
-      id,
-      cpf: customer.cpf,
-      name: customer.name,
-      driverLicense: customer.driverLicense,
-    }
-
-    Customer.customers.push(newcustomer)
+    Customer.customers.push(customer)
   }
 
-  static getById(customerId: string): ICustomer {
+  static getById(customerId: string): Customer {
     const customer = this.customers.find(
-      (customer) => customer.id === customerId,
+      (customer) => customer._id === customerId,
     )
 
     if (!customer) {
       throw new NotFound()
     }
 
-    return customer as ICustomer
+    return customer
   }
 
-  static getAll(): ICustomer[] {
-    return Customer.customers as ICustomer[]
+  static getAll(): Customer[] {
+    return Customer.customers
   }
 
   static delete(customerId: string): boolean {
     const customerIndex = this.customers.findIndex(
-      (customer) => customer.id === customerId,
+      (customer) => customer._id === customerId,
     )
 
     if (customerIndex === -1) {
@@ -87,16 +92,6 @@ export class Customer {
     }
 
     this.customers.splice(customerIndex, 1)
-    return true
-  }
-
-  // TO-DO
-  static rentVehicle(): boolean {
-    return true
-  }
-
-  // TO-DO
-  static returnVehicle(): boolean {
     return true
   }
 }
