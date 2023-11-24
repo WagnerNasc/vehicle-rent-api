@@ -80,15 +80,15 @@ export class Vehicle {
     this._plate = newPlate
   }
 
-  get valueRental(): number {
+  get dailyRental(): number {
     return this._dailyRental
   }
 
-  set valueRental(newValueRental) {
-    if (newValueRental <= 0) {
+  set dailyRental(newDailyRental: number) {
+    if (newDailyRental <= 0) {
       throw new BadRequest('O valor do aluguel deve ser maior que zero')
     }
-    this._dailyRental = newValueRental
+    this._dailyRental = newDailyRental
   }
 
   get rented(): boolean {

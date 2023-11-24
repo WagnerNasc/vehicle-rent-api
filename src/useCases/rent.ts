@@ -1,8 +1,8 @@
 import { Customer } from "./customer";
-import { DataInvalid, NotFound } from "./error/errors";
+import { BadRequest, DataInvalid, NotFound } from "./error/errors";
 import { Invoice } from "./invoice";
 import { compareLicense } from "./utils/rentValidation";
-import { TVehicle, Vehicle } from "./vehicle";
+import { Vehicle } from "./vehicle";
 
 const IVehicle = {
     'CAR' : 'B',
@@ -14,8 +14,6 @@ export class Rent {
     private _vehicle: Vehicle;
     private _rentalDate: Date;
     private _devolutionDate: Date;
-    private _daysRented: number;
-    private _vehicleType: TVehicle;
     private _surcharge: number;
     private _invoice: Invoice;
 
@@ -25,15 +23,12 @@ export class Rent {
         rentalDate: Date,
         devolutionDate: Date,
         daysRented: number,
-        vehicleType: TVehicle,
         surcharge: number
     ) {
         this._customer = customer;
         this._vehicle = vehicle;
         this._rentalDate = rentalDate;
         this._devolutionDate = devolutionDate;
-        this._daysRented = daysRented;
-        this._vehicleType = vehicleType;
         this._surcharge = surcharge;
         this._invoice = new Invoice(customer, vehicle);
     }
@@ -70,22 +65,6 @@ export class Rent {
         this._devolutionDate = newDevolutionDate;
     }
 
-    get daysRented(): number {
-        return this._daysRented;
-    }
-
-    set daysRented(newDaysRented: number) {
-        this._daysRented = newDaysRented;
-    }
-
-    get vehicleType(): TVehicle {
-        return this._vehicleType;
-    }
-
-    set vehicleType(newVehicleType: TVehicle) {
-        this._vehicleType = newVehicleType;
-    }
-
     get surcharge(): number {
         return this._surcharge;
     }
@@ -103,17 +82,21 @@ export class Rent {
     }
 
     calculateRent(days: number, increasePorcentage: number): number {
-        const valueBase = days * this.vehicle.valueRental;
+        const valueBase = days * this.vehicle.dailyRental;
         const valueIncrease = valueBase * (increasePorcentage / 100);
         return valueBase + valueIncrease;
     }
 
     // TO-DO - ALUGAR VEICULO
-    rentVehicle(userId: string, plate: string, rentalDate: Date): boolean {
+    rentVehicle(userId: string, plate: string, rentalDate: Date, devolutionDate: Date): boolean {
         const user = Customer.getById(userId)
 
         if (!user) {
             throw new DataInvalid("Usuário Inválido")
+        }
+
+        if(user.hasRent){
+            throw new BadRequest("Usuário já possui um veículo alugado")
         }
 
         const vehicle = Vehicle.getByPlate(plate)
@@ -123,7 +106,7 @@ export class Rent {
         }
 
         if (vehicle.rented) {
-            throw new NotFound("Veiculo está em uso e não poderá ser alugado")
+            throw new BadRequest("Veiculo está em uso e não poderá ser alugado")
         }
 
         const driverLicenseUser = user.driverLicense
@@ -135,6 +118,11 @@ export class Rent {
         }
 
         this.vehicle.rented = true
+
+        const days = (devolutionDate.getDay() - rentalDate.getDay())
+        const increasePorcentage = this.vehicle.type === 'CAR' ? 10 : 5;
+        const valueRental = this.calculateRent(days, increasePorcentage)
+        // TODO
 
         return true
     }
