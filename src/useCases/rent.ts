@@ -14,7 +14,6 @@ export class Rent {
     private _vehicle: Vehicle;
     private _rentalDate: Date;
     private _devolutionDate: Date;
-    private _surcharge: number;
     private _invoice: Invoice;
     private _valueRental: number;
 
@@ -25,13 +24,11 @@ export class Rent {
         vehicle: Vehicle,
         rentalDate: Date,
         devolutionDate: Date,
-        surcharge: number
     ) {
         this._customer = customer;
         this._vehicle = vehicle;
         this._rentalDate = rentalDate;
         this._devolutionDate = devolutionDate;
-        this._surcharge = surcharge;
         this._invoice = new Invoice(customer, vehicle);
         this._valueRental = 0;
     }
@@ -68,14 +65,6 @@ export class Rent {
         this._devolutionDate = newDevolutionDate;
     }
 
-    get surcharge(): number {
-        return this._surcharge;
-    }
-
-    set surcharge(newSurcharge: number) {
-        this._surcharge = newSurcharge;
-    }
-
     get valueRental(): number {
         return this._valueRental;
     }
@@ -92,40 +81,51 @@ export class Rent {
         return this._invoice.generateInvoice();
     }
 
-    calculateRent(days: number, increasePorcentage: number): number {
-        const valueBase = days * this.vehicle.dailyRental;
+    static calculateRent(vehicle: Vehicle, days: number, increasePorcentage: number): number {
+        const valueBase = days * vehicle.dailyRental;
         const valueIncrease = valueBase * (increasePorcentage / 100);
         return valueBase + valueIncrease;
     }
 
-    // TO-DO - ALUGAR VEICULO
-    rentVehicle(): boolean {
-        const customer = Customer.getById(this._customer.id)
+    static rentVehicle(customer: Customer, vehicle: Vehicle, rentalDate: Date, devolutionDate: Date): boolean {
+        const customer1 = Customer.getById(customer.id)
         verifyCustomer(customer)
 
-        const vehicle = Vehicle.getByPlate(this.vehicle.plate)
+        const vehicle1 = Vehicle.getByPlate(vehicle.plate)
         verifyVehicle(vehicle)
 
-        const driverLicenseUser = customer.driverLicense
-        const typeVehicle = IVehicle[vehicle.type] 
+        const driverLicenseUser = customer1.driverLicense
+        const typeVehicle = IVehicle[vehicle1.type] 
         const verifyLicense = compareLicense(typeVehicle, driverLicenseUser)
 
         if (!verifyLicense) {
             throw new DataInvalid("Usuário não possui habilitação para dirigir este veículo")
         }
 
-        this.vehicle.rented = true
+        vehicle1.rented = true
 
-        const days = (this._devolutionDate.getDay() - this._rentalDate.getDay())
-        const increasePorcentage = this.vehicle.type === 'CAR' ? 10 : 5;
-        this._valueRental = this.calculateRent(days, increasePorcentage)
+        const days = (devolutionDate.getDay() - rentalDate.getDay())
+        const increasePorcentage = vehicle1.type === 'CAR' ? 10 : 5;
+        const valueRental = this.calculateRent(vehicle1, days, increasePorcentage)
 
-        Rent.listOfRent.push(this)
+        const newRent = new Rent(customer1, vehicle1, rentalDate, devolutionDate)
+        Rent.listOfRent.push(newRent)
         return true
     }
 
-    // TO-DO
-    static returnVehicle(): boolean {
+    returnVehicle(cpf: string, plate: string): boolean {
+        const rent = Rent.listOfRent.find(r => r.customer.cpf === cpf && r.vehicle.plate === plate)
+
+        if (!rent) {
+            throw new NotFound("Aluguel não encontrado")
+        }
+
+        rent.vehicle.rented = false
+        rent.customer.hasRent = false
+
+        const indexRent = Rent.listOfRent.findIndex(r => r.customer.cpf === cpf && r.vehicle.plate === plate)
+        Rent.listOfRent.splice(indexRent, 1)
+        
         return true;
     }
 }
