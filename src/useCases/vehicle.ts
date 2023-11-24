@@ -146,7 +146,7 @@ export class Vehicle {
     return true
   }
 
-  static getByPlate(plate: string): Vehicle | undefined {
+  static getByPlate(plate: string): Vehicle  {
     const response = Vehicle.vehicles.filter(
       (vehicle) => vehicle._plate === plate,
     )[0]
