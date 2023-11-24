@@ -1,8 +1,8 @@
-import { body, param, query, validationResult } from 'express-validator'
 import express, { Request, Response } from 'express'
+import { body, param, query, validationResult } from 'express-validator'
 
-import { Vehicle, TVehicle } from './useCases/vehicle'
 import { Customer, ECategoryType } from './useCases/customer'
+import { TVehicle, Vehicle } from './useCases/vehicle'
 
 import 'dotenv/config'
 import { BadRequest, InternalServer, NotFound } from './useCases/error/errors'
@@ -49,7 +49,7 @@ app.post(
 )
 
 /** Vehicle */
-const allowedTypes: TVehicle[] = ['CARRO', 'MOTORCYCLE']
+const allowedTypes: TVehicle[] = ['CAR', 'MOTORCYCLE']
 
 app.post(
   '/vehicle',
