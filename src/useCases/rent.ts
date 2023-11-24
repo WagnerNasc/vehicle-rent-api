@@ -113,11 +113,19 @@ export class Rent {
         return true
     }
 
-    // TO-DO
-    // returnVehicle(cpf: string, plate: string): boolean {
+    returnVehicle(cpf: string, plate: string): boolean {
+        const rent = Rent.listOfRent.find(r => r.customer.cpf === cpf && r.vehicle.plate === plate)
 
+        if (!rent) {
+            throw new NotFound("Aluguel não encontrado")
+        }
 
+        rent.vehicle.rented = false
+        rent.customer.hasRent = false
 
-    //     return true;
-    // }
+        const indexRent = Rent.listOfRent.findIndex(r => r.customer.cpf === cpf && r.vehicle.plate === plate)
+        Rent.listOfRent.splice(indexRent, 1)
+        
+        return true;
+    }
 }
