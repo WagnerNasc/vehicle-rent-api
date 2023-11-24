@@ -1,5 +1,4 @@
-import { randomUUID } from 'crypto'
-import { BadRequest, DataInvalid, NotFound } from './error/errors'
+import { BadRequest, NotFound } from './error/errors'
 
 export type TVehicle = 'CAR' | 'MOTORCYCLE'
 
@@ -50,36 +49,44 @@ export class Vehicle {
     return this._color
   }
 
-  set color(newColor: string) {
-    this._color = newColor
-  }
-
   get chassis(): string {
     return this._chassis
-  }
-
-  set chassis(newChassis: string) {
-    this._chassis = newChassis
   }
 
   get type(): TVehicle {
     return this._type
   }
 
-  set type(newType: TVehicle) {
-    this._type = newType
-  }
-
   get plate(): string {
     return this._plate
   }
 
-  set plate(newPlate: string) {
-    this._plate = newPlate
-  }
-
   get dailyRental(): number {
     return this._dailyRental
+  }
+
+  get rented(): boolean {
+    return this._rented
+  }
+
+  get increasePorcentage(): number {
+    return this._increasePorcentage
+  }
+
+  set color(newColor: string) {
+    this._color = newColor
+  }
+
+  set chassis(newChassis: string) {
+    this._chassis = newChassis
+  }
+
+  set type(newType: TVehicle) {
+    this._type = newType
+  }
+
+  set plate(newPlate: string) {
+    this._plate = newPlate
   }
 
   set dailyRental(newDailyRental: number) {
@@ -89,10 +96,6 @@ export class Vehicle {
     this._dailyRental = newDailyRental
   }
 
-  get rented(): boolean {
-    return this._rented
-  }
-
   set rented(newRented: boolean) {
     if (this._rented === newRented) {
       throw new BadRequest('Não pode ser alterado para o mesmo status')
@@ -100,22 +103,18 @@ export class Vehicle {
     this._rented = newRented
   }
 
-  get increasePorcentage(): number {
-    return this._increasePorcentage
-  }
-
   static findPlate(plate: string): boolean {
-    return Vehicle.vehicles.some(vehicle => vehicle.plate === plate)
+    return this.vehicles.some(vehicle => vehicle.plate === plate)
   }
 
   static create(vehicle: Vehicle): Vehicle {
-    const alreadyExistsVehicle = Vehicle.findPlate(vehicle.plate)
+    const alreadyExistsVehicle = this.findPlate(vehicle.plate)
 
     if(alreadyExistsVehicle){
-      throw new BadRequest()
+      throw new BadRequest('Veículo não encontrado')
     } 
 
-    Vehicle.vehicles.push(vehicle)
+    this.vehicles.push(vehicle)
 
     return vehicle
   }
@@ -124,45 +123,55 @@ export class Vehicle {
   // returnVehicle(userId: string, place: string): void {}
 
   static delete(plate: string): boolean | undefined {
-    const index = Vehicle.vehicles.findIndex(
+    const index = this.vehicles.findIndex(
       (vehicle) => vehicle.plate === plate,
     )
 
     if (index === -1) {
-      throw new NotFound()
+      throw new NotFound('Veículo não encontrado')
     }
 
-    const vehicle = Vehicle.vehicles[index]
+    const vehicle = this.vehicles[index]
 
-    if (vehicle._rented) {
-      throw new BadRequest()
+    if (vehicle.rented) {
+      throw new BadRequest('Veículo alugado e não pode ser excluído')
     }
 
-    Vehicle.vehicles.splice(index, 1)
+    this.vehicles.splice(index, 1)
 
     return true
   }
 
   static getByPlate(plate: string): Vehicle  {
-    const response = Vehicle.vehicles.filter(
+    const vehicle = this.vehicles.filter(
       (vehicle) => vehicle.plate === plate,
     )[0]
 
-    return response
+    if (!vehicle) {
+      throw new NotFound('Veículo não foi encontrado')
+    }
+
+    return vehicle
   }
 
   static getAll(page: number, limit: number): Vehicle[] | [] {
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
 
-    return Vehicle.vehicles.slice(startIndex, endIndex)
+    const vehicle = this.vehicles.slice(startIndex, endIndex)
+
+    if(!vehicle) {
+      throw new NotFound('Nenhum veículo foi encontrado')
+    }
+
+    return vehicle
   }
 
   static listRentedVehicles(): Vehicle[] {
-    return Vehicle.vehicles.filter((vehicle) => vehicle._rented === true)
+    return this.vehicles.filter((vehicle) => vehicle._rented === true)
   }
 
   static listAvailableVehicles(): Vehicle[] {
-    return Vehicle.vehicles.filter((vehicle) => vehicle._rented === false)
+    return this.vehicles.filter((vehicle) => vehicle._rented === false)
   }
 }

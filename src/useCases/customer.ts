@@ -71,15 +71,15 @@ export class Customer {
     )
 
     if (alreadyExistsCustomer) {
-      throw new AlreadyRegistered()
+      throw new AlreadyRegistered('Cliente já registrado')
     }
-
-    Customer.customers.push(newCustomer)
+    
+    this.customers.push(newCustomer)
     
     // TO-DO precisei fazer mais uma consulta para pegar o ID e mandar para front!
 
     const customer = this.customers.find(customer => customer.cpf === newCustomer.cpf)
-
+// 
     return customer as Customer
   }
 
@@ -89,14 +89,35 @@ export class Customer {
     )
 
     if (!customer) {
-      throw new NotFound()
+      throw new NotFound('Cliente não foi encontrado')
     }
 
     return customer
   }
 
-  static getAll(): Customer[] {
-    return Customer.customers
+  static getByCpf(customerCpf: string): Customer {
+    const customer = this.customers.find(
+      (customer) => customer.cpf === customerCpf,
+    )
+
+    if (!customer) {
+      throw new NotFound('Cliente não foi encontrado')
+    }
+
+    return customer
+  }
+
+  static getAll(page: number, limit: number): Customer[] {
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit
+
+    const customer = this.customers.slice(startIndex, endIndex)
+
+    if(!customer) {
+      throw new NotFound('Nenhum cliente foi encontrado')
+    }
+
+    return customer
   }
 
   static delete(customerId: string): boolean {
@@ -105,7 +126,7 @@ export class Customer {
     )
 
     if (customerIndex === -1) {
-      throw new NotFound()
+      throw new NotFound('Cliente não foi encontrado')
     }
 
     this.customers.splice(customerIndex, 1)

@@ -1,14 +1,26 @@
-import { Customer } from "./customer";
-import { BadRequest, DataInvalid, NotFound } from "./error/errors";
-import { Invoice } from "./invoice";
 import { compareLicense, verifyCustomer, verifyVehicle } from "./utils/rentValidation";
+import { DataInvalid, NotFound } from "./error/errors";
+import { Customer } from "./customer";
 import { Vehicle } from "./vehicle";
+import { differenceInDays } from "date-fns";
 
 const IVehicle = {
     'CAR' : 'B',
     'MOTORCYCLE' : 'A',
 }
 
+interface IInvoice {
+    customerName: string;
+    customerCpf: string;
+    customerCnh: string;
+    vehiclePlate: string;
+    vehicleType: string;
+    vehicleModel: string;
+    vehicleRental: number;
+    rentalDate: Date;
+    devolutionDate: Date;
+    valueRental: number;
+  }
 export class Rent {
     private _customer: Customer;
     private _vehicle: Vehicle;
@@ -71,47 +83,44 @@ export class Rent {
         this._valueRental = newValueRental;
     }
 
-    generateInvoice(): string {
-        return Invoice.generateInvoice(this); // não sei se vai funcionar isso
-    }
-
     static calculateRent(vehicle: Vehicle, days: number, increasePorcentage: number): number {
         const valueBase = days * vehicle.dailyRental;
         const valueIncrease = valueBase * (increasePorcentage / 100);
         return valueBase + valueIncrease;
     }
 
-    static rentVehicle(customer: Customer, vehicle: Vehicle, rentalDate: Date, devolutionDate: Date): boolean {
-        const customer1 = Customer.getById(customer.id)
+    static rentVehicle(customerCpf: string, vehiclePlate: string, rentalDate: Date, devolutionDate: Date): Rent {
+        const customer = Customer.getByCpf(customerCpf)
         verifyCustomer(customer)
 
-        const vehicle1 = Vehicle.getByPlate(vehicle.plate)
+        const vehicle = Vehicle.getByPlate(vehiclePlate)
         verifyVehicle(vehicle)
-
-        const driverLicenseUser = customer1.driverLicense
-        const typeVehicle = IVehicle[vehicle1.type] 
+        const driverLicenseUser = customer.driverLicense
+        const typeVehicle = IVehicle[vehicle.type] 
         const verifyLicense = compareLicense(typeVehicle, driverLicenseUser)
 
         if (!verifyLicense) {
-            throw new DataInvalid("Usuário não possui habilitação para dirigir este veículo")
+            throw new DataInvalid()
         }
 
-        vehicle1.rented = true
+        vehicle.rented = true
 
-        const days = (devolutionDate.getDay() - rentalDate.getDay())
-        const increasePorcentage = vehicle1.type === 'CAR' ? 10 : 5;
-        const valueRental = this.calculateRent(vehicle1, days, increasePorcentage)
+        const dateRented = differenceInDays(devolutionDate, rentalDate);
+        const increasePorcentage = vehicle.type === 'CAR' ? 10 : 5;
+        const valueRental = this.calculateRent(vehicle, dateRented, increasePorcentage)
 
-        const newRent = new Rent(customer1, vehicle1, rentalDate, devolutionDate)
-        Rent.listOfRent.push(newRent)
-        return true
+        const rent = new Rent(customer, vehicle, rentalDate, devolutionDate)
+        rent.valueRental = valueRental
+        Rent.listOfRent.push(rent)
+
+        return rent
     }
 
-    static returnVehicle(cpf: string, plate: string): boolean {
+    static devolutionVehicle(cpf: string, plate: string): boolean {
         const rent = Rent.listOfRent.find(r => r.customer.cpf === cpf && r.vehicle.plate === plate)
 
         if (!rent) {
-            throw new NotFound("Aluguel não encontrado")
+            throw new NotFound('Aluguel não encontrado')
         }
 
         rent.vehicle.rented = false
@@ -121,5 +130,26 @@ export class Rent {
         Rent.listOfRent.splice(indexRent, 1)
         
         return true;
+    }
+
+    static generateInvoice(cpf: string, plate: string): IInvoice  {
+        const rent = Rent.listOfRent.find(r => r.customer.cpf === cpf && r.vehicle.plate === plate)
+
+        if (!rent) {
+            throw new NotFound('Aluguel não encontrado')
+        }
+        
+        return {
+            customerName: rent.customer.name,
+            customerCpf: rent.customer.cpf,
+            customerCnh: rent.customer.driverLicense,
+            vehiclePlate: rent.vehicle.plate,
+            vehicleType: rent.vehicle.type,
+            vehicleModel: rent.vehicle.model,
+            vehicleRental: rent.vehicle.dailyRental,
+            rentalDate: rent.rentalDate,
+            devolutionDate: rent.devolutionDate,
+            valueRental: rent.valueRental,
+        }
     }
 }
