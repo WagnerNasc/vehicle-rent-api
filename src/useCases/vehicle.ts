@@ -117,16 +117,6 @@ export class Vehicle {
     } 
 
     const id = randomUUID()
-    // const newVehicle: Vehicle = {
-    //   id,
-    //   model: vehicle.model,
-    //   color: vehicle.color,
-    //   chassis: vehicle.chassis,
-    //   type: vehicle.type,
-    //   plate: vehicle.plate,
-    //   valueRental: vehicle.valueRental,
-    //   rented: vehicle.rented,
-    // }
 
     // Vehicle.vehicles.push(newVehicle)
     Vehicle.vehicles.push(vehicle)
@@ -137,12 +127,6 @@ export class Vehicle {
 
   // TO-DO - DEVOLVER VEÍCULO
   // returnVehicle(userId: string, place: string): void {}
-
-  calculateRent(days: number, increasePorcentage: number): number {
-    const valueBase = days * this._valueRental
-    const valueIncrease = valueBase * (increasePorcentage / 100)
-    return valueBase + valueIncrease
-  }
 
   static delete(plate: string): boolean | undefined {
     const index = Vehicle.vehicles.findIndex(
