@@ -1,6 +1,7 @@
-import { BadRequest, NotFound } from './error/errors'
-import { Model } from './model'
 import { randomUUID } from 'crypto'
+import { Customer } from './customer'
+import { BadRequest, DataInvalid, NotFound } from './error/errors'
+import { Model } from './model'
 
 export type TVehicle = 'CARRO' | 'MOTORCYCLE'
 
@@ -133,7 +134,37 @@ export class Vehicle {
   }
 
   // TO-DO - ALUGAR VEICULO
-  // rentVehicle(userId: string, place: string): void {}
+  rentVehicle(userId: string, plate: string, valueRent: number): void {
+    const user = Customer.getById(userId)
+    console.log(valueRent)
+
+    if(!user){
+      throw new DataInvalid("Usuário Inválido")
+    }
+
+    const vehicle = Vehicle.getByPlate(plate)
+    console.log(vehicle) // TEST
+
+
+    if(!vehicle){
+      throw new DataInvalid("Veículo Inválido")
+    }
+
+    if(vehicle.rented){
+      throw new NotFound("Veiculo está em uso e não poderá ser alugado")
+    }
+
+    const driverLicenseUser = user.driverLicense
+
+    // const typeVehicle = vehicle.type 
+
+    const cl = compareLicence('A', driverLicenseUser)
+
+    if(cl){
+      this.rented = true
+      Customer.rentVehicle() // TO-DO
+    }
+  }
 
   // TO-DO - DEVOLVER VEÍCULO
   // returnVehicle(userId: string, place: string): void {}
