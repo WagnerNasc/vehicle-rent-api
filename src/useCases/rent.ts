@@ -107,7 +107,7 @@ export class Rent {
         return true
     }
 
-    returnVehicle(cpf: string, plate: string): boolean {
+    static returnVehicle(cpf: string, plate: string): boolean {
         const rent = Rent.listOfRent.find(r => r.customer.cpf === cpf && r.vehicle.plate === plate)
 
         if (!rent) {
