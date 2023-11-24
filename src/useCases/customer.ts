@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { UUID, randomUUID } from 'crypto'
 import { AlreadyRegistered, NotFound } from './error/errors'
 import { Vehicle } from './vehicle'
 
@@ -23,10 +23,11 @@ export enum ECategoryType {
 
 export class Customer {
   
-  private _id: string
+  private _id: UUID
   private _cpf: string
   private _name: string
   private _driverLicense: ECategoryType
+  private _hasRent = false
   
   private static customers: Customer[] = []
 
@@ -103,18 +104,7 @@ export class Customer {
   }
 
   // TO-DO
-  static rentVehicle(vehicle: Vehicle): boolean {
-    // if(vehicle.rented){
-    //   throw new Error('Veículo já alugado')
-    // }
-
-    // if(vehicle.type !== 'MOTORCYCLE' && ECategoryType.A === 'A'){
-    //   throw new Error('Clientes com categoria A só podem alugar motos')
-    // }
-
-    // if(vehicle.type !== 'CARRO' && ECategoryType.B === 'B'){
-    //   throw new Error('Clientes com categoria B só podem alugar carros')
-    // }
+  rentVehicle(vehicle: Vehicle): boolean {
     return true
   }
 
