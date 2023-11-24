@@ -1,4 +1,5 @@
 import { Customer } from "./customer";
+import { Invoice } from "./invoice";
 import { TVehicle, Vehicle } from "./vehicle";
 
 export class Rent {
@@ -10,6 +11,7 @@ export class Rent {
     private _daysRented: number;
     private _vehicleType: TVehicle;
     private _surcharge: number;
+    private _invoice: Invoice;
 
     constructor(
         customer: Customer,
@@ -29,6 +31,7 @@ export class Rent {
         this._daysRented = daysRented;
         this._vehicleType = vehicleType;
         this._surcharge = surcharge;
+        this._invoice = new Invoice(customer, vehicle);
     }
 
     get customer(): Customer {
@@ -97,6 +100,10 @@ export class Rent {
 
     calculateTotalValue(): number {
         return this._dailyRate * this._daysRented;
+    }
+
+    genrateInvoice(): string {
+        return this._invoice.generateInvoice();
     }
 
 }
