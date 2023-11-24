@@ -1,12 +1,10 @@
 import { randomUUID } from 'crypto'
-import { Customer } from './customer'
 import { BadRequest, DataInvalid, NotFound } from './error/errors'
-import { Model } from './model'
 
 export type TVehicle = 'CAR' | 'MOTORCYCLE'
 
 export class Vehicle {
-  private _model: Model
+  private _model: string
   private _color: string
   private _chassis: string
   private _type: TVehicle
@@ -19,7 +17,7 @@ export class Vehicle {
   static vehicles: Vehicle[] = []
 
   constructor(
-    model: Model,
+    model: string,
     color: string,
     chassis: string,
     type: TVehicle,
@@ -40,11 +38,11 @@ export class Vehicle {
     Vehicle.vehicles.push(this)
   }
 
-  get model(): Model {
+  get model(): string {
     return this._model
   }
 
-  set model(newModel: Model) {
+  set model(newModel: string) {
     this._model = newModel
   }
 
