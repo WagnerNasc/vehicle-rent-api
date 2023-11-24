@@ -1,15 +1,19 @@
 import { Customer } from "./customer";
+import { BadRequest, DataInvalid, NotFound } from "./error/errors";
 import { Invoice } from "./invoice";
-import { TVehicle, Vehicle } from "./vehicle";
+import { compareLicense } from "./utils/rentValidation";
+import { Vehicle } from "./vehicle";
+
+const IVehicle = {
+    'CAR' : 'B',
+    'MOTORCYCLE' : 'A',
+}
 
 export class Rent {
     private _customer: Customer;
     private _vehicle: Vehicle;
     private _rentalDate: Date;
     private _devolutionDate: Date;
-    private _dailyRate: number;
-    private _daysRented: number;
-    private _vehicleType: TVehicle;
     private _surcharge: number;
     private _invoice: Invoice;
 
@@ -18,18 +22,13 @@ export class Rent {
         vehicle: Vehicle,
         rentalDate: Date,
         devolutionDate: Date,
-        dailyRate: number,
         daysRented: number,
-        vehicleType: TVehicle,
         surcharge: number
     ) {
         this._customer = customer;
         this._vehicle = vehicle;
         this._rentalDate = rentalDate;
         this._devolutionDate = devolutionDate;
-        this._dailyRate = dailyRate;
-        this._daysRented = daysRented;
-        this._vehicleType = vehicleType;
         this._surcharge = surcharge;
         this._invoice = new Invoice(customer, vehicle);
     }
@@ -66,30 +65,6 @@ export class Rent {
         this._devolutionDate = newDevolutionDate;
     }
 
-    get dailyRate(): number {
-        return this._dailyRate;
-    }
-
-    set dailyRate(newDailyRate: number) {
-        this._dailyRate = newDailyRate;
-    }
-
-    get daysRented(): number {
-        return this._daysRented;
-    }
-
-    set daysRented(newDaysRented: number) {
-        this._daysRented = newDaysRented;
-    }
-
-    get vehicleType(): TVehicle {
-        return this._vehicleType;
-    }
-
-    set vehicleType(newVehicleType: TVehicle) {
-        this._vehicleType = newVehicleType;
-    }
-
     get surcharge(): number {
         return this._surcharge;
     }
@@ -98,24 +73,58 @@ export class Rent {
         this._surcharge = newSurcharge;
     }
 
-    calculateTotalValue(): number {
-        return this._dailyRate * this._daysRented;
-    }
+    // calculateTotalValue(): number {
+    //     return  * this._daysRented;
+    // }
 
     generateInvoice(): string {
         return this._invoice.generateInvoice();
     }
 
     calculateRent(days: number, increasePorcentage: number): number {
-        const valueBase = days * this.vehicle.valueRental;
+        const valueBase = days * this.vehicle.dailyRental;
         const valueIncrease = valueBase * (increasePorcentage / 100);
         return valueBase + valueIncrease;
     }
 
-    // TO-DO
-    rentVehicle(vehicle: Vehicle): boolean {
-        
-        return true;
+    // TO-DO - ALUGAR VEICULO
+    rentVehicle(userId: string, plate: string, rentalDate: Date, devolutionDate: Date): boolean {
+        const user = Customer.getById(userId)
+
+        if (!user) {
+            throw new DataInvalid("Usuário Inválido")
+        }
+
+        if(user.hasRent){
+            throw new BadRequest("Usuário já possui um veículo alugado")
+        }
+
+        const vehicle = Vehicle.getByPlate(plate)
+
+        if (!vehicle) {
+            throw new DataInvalid("Veículo Inválido")
+        }
+
+        if (vehicle.rented) {
+            throw new BadRequest("Veiculo está em uso e não poderá ser alugado")
+        }
+
+        const driverLicenseUser = user.driverLicense
+        const typeVehicle = IVehicle[vehicle.type] 
+        const verifyLicense = compareLicense(typeVehicle, driverLicenseUser)
+
+        if (!verifyLicense) {
+            throw new DataInvalid("Usuário não possui habilitação para dirigir este veículo")
+        }
+
+        this.vehicle.rented = true
+
+        const days = (devolutionDate.getDay() - rentalDate.getDay())
+        const increasePorcentage = this.vehicle.type === 'CAR' ? 10 : 5;
+        const valueRental = this.calculateRent(days, increasePorcentage)
+        // TODO
+
+        return true
     }
 
     // TO-DO

@@ -10,7 +10,7 @@ export const punctuation = {
 } as const
 
 // Função responsável por criar uma 
-export function compareLicence(typeVehicle: string, driverLicenseUser: string) {
+export function compareLicense(typeVehicle: string, driverLicenseUser: string) {
   if (!typeVehicle) {
     throw new NotFound('Tipo de veiculo inválido')
   }
