@@ -14,7 +14,6 @@ export class Rent {
     private _vehicle: Vehicle;
     private _rentalDate: Date;
     private _devolutionDate: Date;
-    private _invoice: Invoice;
     private _valueRental: number;
 
     private static listOfRent: Rent[] = [];
@@ -29,7 +28,6 @@ export class Rent {
         this._vehicle = vehicle;
         this._rentalDate = rentalDate;
         this._devolutionDate = devolutionDate;
-        this._invoice = new Invoice(customer, vehicle);
         this._valueRental = 0;
     }
 
@@ -73,12 +71,8 @@ export class Rent {
         this._valueRental = newValueRental;
     }
 
-    // calculateTotalValue(): number {
-    //     return  * this._daysRented;
-    // }
-
     generateInvoice(): string {
-        return this._invoice.generateInvoice();
+        return Invoice.generateInvoice(this); // não sei se vai funcionar isso
     }
 
     static calculateRent(vehicle: Vehicle, days: number, increasePorcentage: number): number {
