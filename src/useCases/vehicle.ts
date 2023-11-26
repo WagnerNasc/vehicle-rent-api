@@ -22,7 +22,7 @@ export class Vehicle {
     type: TVehicle,
     plate: string,
     dailyRental: number,
-    rented: boolean,
+    rented: boolean
   ) {
     this._model = model
     this._color = color
@@ -104,15 +104,15 @@ export class Vehicle {
   }
 
   static findPlate(plate: string): boolean {
-    return this.vehicles.some(vehicle => vehicle.plate === plate)
+    return this.vehicles.some((vehicle) => vehicle.plate === plate)
   }
 
   static create(vehicle: Vehicle): Vehicle {
     const alreadyExistsVehicle = this.findPlate(vehicle.plate)
 
-    if(alreadyExistsVehicle){
+    if (alreadyExistsVehicle) {
       throw new BadRequest('Veículo não encontrado')
-    } 
+    }
 
     this.vehicles.push(vehicle)
 
@@ -123,9 +123,7 @@ export class Vehicle {
   // returnVehicle(userId: string, place: string): void {}
 
   static delete(plate: string): boolean | undefined {
-    const index = this.vehicles.findIndex(
-      (vehicle) => vehicle.plate === plate,
-    )
+    const index = this.vehicles.findIndex((vehicle) => vehicle.plate === plate)
 
     if (index === -1) {
       throw new NotFound('Veículo não encontrado')
@@ -142,9 +140,9 @@ export class Vehicle {
     return true
   }
 
-  static getByPlate(plate: string): Vehicle  {
+  static getByPlate(plate: string): Vehicle {
     const vehicle = this.vehicles.filter(
-      (vehicle) => vehicle.plate === plate,
+      (vehicle) => vehicle.plate === plate
     )[0]
 
     if (!vehicle) {
@@ -160,7 +158,7 @@ export class Vehicle {
 
     const vehicle = this.vehicles.slice(startIndex, endIndex)
 
-    if(!vehicle) {
+    if (!vehicle) {
       throw new NotFound('Nenhum veículo foi encontrado')
     }
 

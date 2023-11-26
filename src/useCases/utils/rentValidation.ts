@@ -34,20 +34,20 @@ export function compareLicense(typeVehicle: string, driverLicenseUser: string) {
 
 export function verifyCustomer(customer: Customer): void {
   if (!customer) {
-    throw new DataInvalid("Usuário Inválido")
+    throw new DataInvalid('Usuário Inválido')
   }
 
   if (customer.hasRent) {
-    throw new BadRequest("Usuário já possui um veículo alugado")
+    throw new BadRequest('Usuário já possui um veículo alugado')
   }
 }
 
 export function verifyVehicle(vehicle: Vehicle | undefined): void {
   if (!vehicle) {
-    throw new DataInvalid("Veículo Inválido")
+    throw new DataInvalid('Veículo Inválido')
   }
 
   if (vehicle.rented) {
-    throw new BadRequest("Veiculo está em uso e não poderá ser alugado")
+    throw new BadRequest('Veiculo está em uso e não poderá ser alugado')
   }
 }
