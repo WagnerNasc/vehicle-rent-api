@@ -119,7 +119,7 @@ export class Rent {
     const devolution = parseISO(String(devolutionDate))
     const rental = parseISO(String(rentalDate))
 
-    const dateRented = differenceInDays(devolution, rental) + 1
+    const dateRented = differenceInDays(devolution, rental) + 1 // TO-DO VERIFICAR O +1
 
     if (dateRented < 0) {
       throw new DifferenceBetweenDate(
@@ -144,6 +144,14 @@ export class Rent {
   }
 
   static devolutionVehicle(cpf: string, plate: string): boolean {
+    const customer = Customer.getByCpf(cpf)
+    verifyCustomer(customer)
+
+    const vehicle = Vehicle.getByPlate(plate)
+    if (!vehicle) {
+      throw new DataInvalid('Veículo Inválido')
+    }
+
     const rent = Rent.listOfRent.find(
       (r) => r.customer.cpf === cpf && r.vehicle.plate === plate
     )
@@ -152,13 +160,14 @@ export class Rent {
       throw new NotFound('Aluguel não encontrado')
     }
 
-    rent.vehicle.rented = false
-    rent.customer.hasRent = false
-
     const indexRent = Rent.listOfRent.findIndex(
       (r) => r.customer.cpf === cpf && r.vehicle.plate === plate
     )
     Rent.listOfRent.splice(indexRent, 1)
+
+
+    rent.vehicle.rented = false
+    rent.customer.hasRent = false
 
     return true
   }
