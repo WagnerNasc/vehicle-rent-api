@@ -5,7 +5,13 @@ import { Customer, ECategoryType } from './useCases/customer'
 import { TVehicle, Vehicle } from './useCases/vehicle'
 
 import 'dotenv/config'
-import { AlreadyRegistered, BadRequest, DataInvalid, NotFound } from './useCases/error/errors'
+import {
+  AlreadyRegistered,
+  BadRequest,
+  DataInvalid,
+  DifferenceBetweenDate,
+  NotFound,
+} from './useCases/error/errors'
 import { Rent } from './useCases/rent'
 
 /** Vehicles */
@@ -22,7 +28,10 @@ const allowedCustomerCategoryTypes = Object.values(ECategoryType)
 app.post(
   '/customer',
   [
-    body('cpf').isString().notEmpty(),
+    body('cpf')
+      .isString()
+      .notEmpty()
+      .matches(/^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}$/g),
     body('name').isString().notEmpty(),
     body('dateOfBirth').isString().notEmpty(),
     body('driverLicense')
@@ -36,7 +45,7 @@ app.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() })
     }
-    
+
     const customer = req.body
 
     try {
@@ -51,12 +60,16 @@ app.post(
       }
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.get(
   '/customer/:customerCpf',
-  [param('customerCpf').isString()],
+  [
+    param('customerCpf')
+      .isString()
+      .matches(/^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}$/g),
+  ],
   (req: Request, res: Response) => {
     const errors = validationResult(req)
 
@@ -68,6 +81,7 @@ app.get(
 
     try {
       const foundCustomer = Customer.getByCpf(customerCpf)
+      console.log(foundCustomer)
 
       return res.status(200).send({
         data: foundCustomer,
@@ -79,7 +93,7 @@ app.get(
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.get(
@@ -100,9 +114,7 @@ app.get(
     }
 
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1
-    const limit = req.query.limit
-      ? parseInt(req.query.limit as string, 10)
-      : 10
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10
 
     try {
       const foundCustomer = Customer.getAll(page, limit)
@@ -113,14 +125,12 @@ app.get(
       })
     } catch (error) {
       if (error instanceof NotFound) {
-        return res
-          .status(400)
-          .send({ message: error.message })
+        return res.status(400).send({ message: error.message })
       }
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 /** Vehicle */
@@ -149,19 +159,29 @@ app.post(
     const { model, color, chassis, type, plate, dailyRental } = req.body
 
     try {
-      const vehicle: Vehicle = { model, color, chassis, type, plate, dailyRental, rented: false  } as Vehicle
+      const vehicle: Vehicle = {
+        model,
+        color,
+        chassis,
+        type,
+        plate,
+        dailyRental,
+        rented: false,
+      } as Vehicle
       const newVehicle = Vehicle.create(vehicle)
-      
+
       return res.status(200).send({
         data: newVehicle,
       })
     } catch (error) {
       if (error instanceof BadRequest) {
-        return res.status(400).send({ message: `Veículo com placa ${plate} já cadastrado` })
+        return res
+          .status(400)
+          .send({ message: `Veículo com placa ${plate} já cadastrado` })
       }
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.get(
@@ -193,7 +213,7 @@ app.get(
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.get(
@@ -214,9 +234,7 @@ app.get(
     }
 
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1
-    const limit = req.query.limit
-      ? parseInt(req.query.limit as string, 10)
-      : 10
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10
 
     try {
       const foundVehicle = Vehicle.getAll(page, limit)
@@ -227,14 +245,12 @@ app.get(
       })
     } catch (error) {
       if (error instanceof NotFound) {
-        return res
-          .status(400)
-          .send({ message: error.message })
+        return res.status(400).send({ message: error.message })
       }
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.delete(
@@ -259,14 +275,12 @@ app.delete(
       }
 
       if (error instanceof NotFound) {
-        return res
-          .status(404)
-          .send({ message: error.message })
+        return res.status(404).send({ message: error.message })
       }
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 /** Rent */
@@ -290,35 +304,36 @@ app.post(
 
     try {
       const rent = Rent.rentVehicle(cpf, plate, rentalDate, devolutionDate)
-      const { vehicle, customer, ...response } = rent;
-      
+      const { vehicle, customer, ...response } = rent
+
       res.status(200).send({
         data: response,
       })
     } catch (error) {
       if (error instanceof BadRequest) {
-        return res
-          .status(400)
-          .send({ message: error.message})
+        return res.status(400).send({ message: error.message })
       }
 
       if (error instanceof DataInvalid) {
-        return res
-          .status(400)
-          .send({ message: error.message})
+        return res.status(400).send({ message: error.message })
+      }
+
+      if (error instanceof NotFound) {
+        return res.status(400).send({ message: error.message })
+      }
+
+      if (error instanceof DifferenceBetweenDate) {
+        return res.status(400).send({ message: error.message })
       }
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.post(
   '/rent/vehicle/devolution',
-  [
-    body('cpf').isString().notEmpty(),
-    body('plate').isString().notEmpty(),
-  ],
+  [body('cpf').isString().notEmpty().matches(/^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}$/g), body('plate').isString().notEmpty()],
   (req: Request, res: Response) => {
     const errors = validationResult(req)
 
@@ -334,22 +349,17 @@ app.post(
       res.status(204).send()
     } catch (error) {
       if (error instanceof NotFound) {
-        return res
-          .status(400)
-          .send({ message: error.message })
+        return res.status(400).send({ message: error.message })
       }
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.post(
   '/rent/invoice',
-  [
-    body('cpf').isString().notEmpty(),
-    body('plate').isString().notEmpty(),
-  ],
+  [body('cpf').isString().notEmpty(), body('plate').isString().notEmpty()],
   (req: Request, res: Response) => {
     const errors = validationResult(req)
 
@@ -365,14 +375,12 @@ app.post(
       res.status(204).send()
     } catch (error) {
       if (error instanceof NotFound) {
-        return res
-          .status(400)
-          .send({ message: error.message })
+        return res.status(400).send({ message: error.message })
       }
 
       return res.status(500).send({ message: 'Erro interno do servidor' })
     }
-  },
+  }
 )
 
 app.listen(PORT, () => {
