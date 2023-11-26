@@ -5,7 +5,7 @@ import { Customer, ECategoryType } from './useCases/customer'
 import { TVehicle, Vehicle } from './useCases/vehicle'
 
 import 'dotenv/config'
-import { AlreadyRegistered, BadRequest, DataInvalid, NotFound } from './useCases/error/errors'
+import { AlreadyRegistered, BadRequest, DataInvalid, DifferenceBetweenDate, NotFound } from './useCases/error/errors'
 import { Rent } from './useCases/rent'
 
 /** Vehicles */
@@ -306,6 +306,18 @@ app.post(
         return res
           .status(400)
           .send({ message: error.message})
+      }
+
+      if(error instanceof NotFound){
+        return res
+        .status(400)
+        .send({message: error.message})
+      }
+
+      if(error instanceof DifferenceBetweenDate){
+        return res
+        .status(400)
+        .send({message: error.message})
       }
 
       return res.status(500).send({ message: 'Erro interno do servidor' })

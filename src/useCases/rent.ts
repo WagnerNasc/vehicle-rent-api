@@ -1,8 +1,8 @@
-import { compareLicense, verifyCustomer, verifyVehicle } from "./utils/rentValidation";
-import { DataInvalid, NotFound } from "./error/errors";
-import { Customer } from "./customer";
-import { Vehicle } from "./vehicle";
 import { differenceInDays, parseISO } from "date-fns";
+import { Customer } from "./customer";
+import { DataInvalid, DifferenceBetweenDate, NotFound } from "./error/errors";
+import { compareLicense, verifyCustomer, verifyVehicle } from "./utils/rentValidation";
+import { Vehicle } from "./vehicle";
 
 const IVehicle = {
     'CAR' : 'B',
@@ -103,17 +103,24 @@ export class Rent {
             throw new DataInvalid()
         }
 
-        vehicle.rented = true
         const devolution = parseISO(String(devolutionDate)) 
         const rental = parseISO(String(rentalDate)) 
 
-        const dateRented = differenceInDays(devolution, rental);
+        const dateRented = differenceInDays(devolution, rental) + 1;
+
+        if(dateRented < 0){
+            throw new DifferenceBetweenDate('Data da devolução deve ser maior ou igual que a de solicitação')
+        }
+
         const increasePorcentage = vehicle.type === 'CAR' ? 10 : 5;
         const valueRental = this.calculateRent(vehicle, dateRented, increasePorcentage)
 
         const rent = new Rent(customer, vehicle, rentalDate, devolutionDate)
         rent.valueRental = valueRental
         Rent.listOfRent.push(rent)
+
+        vehicle.rented = true
+
 
         return rent
     }
