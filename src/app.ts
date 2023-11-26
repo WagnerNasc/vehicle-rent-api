@@ -33,7 +33,7 @@ app.post(
       .notEmpty()
       .matches(/^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}$/g),
     body('name').isString().notEmpty(),
-    body('dateOfBirth').isString().notEmpty().isDate(),
+    body('dateOfBirth').isString().notEmpty(),
     body('driverLicense')
       .isString()
       .notEmpty()
@@ -81,6 +81,7 @@ app.get(
 
     try {
       const foundCustomer = Customer.getByCpf(customerCpf)
+      console.log(foundCustomer)
 
       return res.status(200).send({
         data: foundCustomer,
@@ -332,7 +333,7 @@ app.post(
 
 app.post(
   '/rent/vehicle/devolution',
-  [body('cpf').isString().notEmpty(), body('plate').isString().notEmpty()],
+  [body('cpf').isString().notEmpty().matches(/^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}$/g), body('plate').isString().notEmpty()],
   (req: Request, res: Response) => {
     const errors = validationResult(req)
 
