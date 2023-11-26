@@ -28,8 +28,8 @@ export class InternalServer extends Error {
   }
 }
 
-export class DifferenceBetweenDate extends Error{
-  constructor(message = 'Diferença entre datas deve ser maior que 0(zero)'){
+export class DifferenceBetweenDate extends Error {
+  constructor(message = 'Diferença entre datas deve ser maior que 0(zero)') {
     super(message)
   }
 }
