@@ -22,9 +22,9 @@ const allowedCustomerCategoryTypes = Object.values(ECategoryType)
 app.post(
   '/customer',
   [
-    body('cpf').isString().notEmpty(),
+    body('cpf').isString().notEmpty().matches(/^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}$/g),
     body('name').isString().notEmpty(),
-    body('dateOfBirth').isString().notEmpty(),
+    body('dateOfBirth').isString().notEmpty().isDate(),
     body('driverLicense')
       .isString()
       .notEmpty()
@@ -56,7 +56,7 @@ app.post(
 
 app.get(
   '/customer/:customerCpf',
-  [param('customerCpf').isString()],
+  [param('customerCpf').isString().matches(/^[0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}$/g)],
   (req: Request, res: Response) => {
     const errors = validationResult(req)
 
